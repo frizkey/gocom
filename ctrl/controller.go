@@ -1,0 +1,132 @@
+package ctrl
+
+import (
+	"fmt"
+	"sync"
+
+	"github.com/adlindo/gocom/config"
+)
+
+// ----------------------------------------
+
+var controllerList []Controller = []Controller{}
+var app App
+var appOnce sync.Once
+var appCreatorMap map[string]HttpAppCreatorFunc = map[string]HttpAppCreatorFunc{}
+
+type HttpAppCreatorFunc func() App
+
+func RegAppCreator(name string, creator HttpAppCreatorFunc) {
+	appCreatorMap[name] = creator
+}
+
+// ---------------------------------------
+
+type App interface {
+	Get(path string, handlers ...HandlerFunc)
+	Post(path string, handlers ...HandlerFunc)
+	Put(path string, handlers ...HandlerFunc)
+	Patch(path string, handlers ...HandlerFunc)
+	Delete(path string, handlers ...HandlerFunc)
+	Start()
+}
+
+type Context interface {
+	Status(code int) Context
+	Body() []byte
+	Param(key string, defaulVal ...string) string
+	Query(key string, defaulVal ...string) string
+	FormValue(key string, defaulVal ...string) string
+	Bind(target interface{}) error
+	SetHeader(key string, value string)
+	GetHeader(key string) string
+	Set(key string, value interface{})
+	Get(key string) interface{}
+	SendString(data string) error
+	SendJSON(data interface{}) error
+	SendFile(filePath string, fileName string) error
+	SendFileBytes(data []byte, fileName string) error
+	SendResult(data interface{}) error
+	SendError(code int, message string, data ...interface{}) error
+	Next() error
+}
+
+type Result struct {
+	Code     int         `json:"code"`
+	Messages string      `json:"message"`
+	Data     interface{} `json:"data"`
+}
+
+type HandlerFunc func(ctx Context) error
+
+type Controller interface {
+	Init()
+}
+
+// Funcs ----------------------------------------
+
+func init() {
+	fmt.Println("init controller")
+
+	config.SetDefault("app.http.port", 9494)
+	config.SetDefault("app.http.address", "")
+}
+
+func getApp() App {
+
+	if app == nil {
+
+		appOnce.Do(func() {
+
+			appType := config.Get("app.http.type", "fiber")
+
+			creator := appCreatorMap[appType]
+
+			if creator != nil {
+				app = creator()
+			}
+		})
+	}
+
+	return app
+}
+
+func GET(path string, handlers ...HandlerFunc) {
+
+	getApp().Get(path, handlers...)
+}
+
+func POST(path string, handlers ...HandlerFunc) {
+
+	getApp().Post(path, handlers...)
+}
+
+func PUT(path string, handlers ...HandlerFunc) {
+
+	getApp().Put(path, handlers...)
+}
+
+func PATCH(path string, handlers ...HandlerFunc) {
+
+	getApp().Patch(path, handlers...)
+}
+
+func DELETE(path string, handlers ...HandlerFunc) {
+
+	getApp().Delete(path, handlers...)
+}
+
+func Add(ctrl Controller) {
+
+	controllerList = append(controllerList, ctrl)
+}
+
+func Start() {
+
+	for _, ctrl := range controllerList {
+
+		ctrl.Init()
+	}
+
+	getApp().Start()
+}
