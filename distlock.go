@@ -32,7 +32,7 @@ func GetLock(name string, maxWait time.Duration, ttl time.Duration) *DistLock {
 	}
 
 	// check if KV avail
-	kv := KVConn()
+	kv := KV()
 
 	maxTime := time.Now().Add(maxWait)
 
@@ -57,7 +57,7 @@ func GetLock(name string, maxWait time.Duration, ttl time.Duration) *DistLock {
 	} else {
 
 		// check db if avail
-		db := DBConn()
+		db := DB()
 
 		if db != nil {
 
@@ -104,7 +104,7 @@ func ReleaseLock(lock *DistLock) error {
 func (o *DistLock) Release() error {
 
 	// check if KV avail
-	kv := KVConn()
+	kv := KV()
 
 	if kv != nil {
 
@@ -117,7 +117,7 @@ func (o *DistLock) Release() error {
 	} else {
 
 		// check db if avail
-		db := DBConn()
+		db := DB()
 
 		if db != nil {
 

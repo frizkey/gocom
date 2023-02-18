@@ -153,7 +153,7 @@ func (o *RedisKV) AtIndexInt(key string, index int) int {
 //-----------------------------------------------------------------------
 
 func init() {
-	RegKVCreator("redis", func(url string) (KV, error) {
+	RegKVCreator("redis", func(url string) (KVClient, error) {
 		ret := &RedisKV{
 			ctx: context.Background(),
 		}

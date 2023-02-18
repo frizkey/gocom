@@ -1,4 +1,4 @@
-package ctrl
+package gocom
 
 import (
 	"io/ioutil"

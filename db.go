@@ -20,13 +20,19 @@ func RegDBCreator(typeName string, creator DBCreatorFunc) {
 	dbCreatorMap[typeName] = creator
 }
 
-func DBConnByName(name string) *gorm.DB {
+func DB(name ...string) *gorm.DB {
 
-	if name == "" {
-		name = "default"
+	var targetName string
+
+	if len(name) > 0 {
+		targetName = name[0]
 	}
 
-	ret, ok := dbMap[name]
+	if targetName == "" {
+		targetName = "default"
+	}
+
+	ret, ok := dbMap[targetName]
 
 	if !ok {
 
@@ -34,28 +40,28 @@ func DBConnByName(name string) *gorm.DB {
 		defer dbMutex.Unlock()
 
 		// check whether other thread already create the db
-		ret, ok = dbMap[name]
+		ret, ok = dbMap[targetName]
 
 		if !ok {
 
-			if config.HasConfig("app.db."+name+".type") && config.HasConfig("app.db."+name+".dsn") {
+			if config.HasConfig("app.db."+targetName+".type") && config.HasConfig("app.db."+targetName+".dsn") {
 
-				dbType := config.Get("app.db." + name + ".type")
+				dbType := config.Get("app.db." + targetName + ".type")
 
 				creator, ok := dbCreatorMap[dbType]
 
 				if ok {
 
-					dsn := config.Get("app.db." + name + ".dsn")
-					poolSize := config.GetInt("app.db."+name+".poolSize", 20)
-					debug := config.GetBool("app.db."+name+".debug", false)
+					dsn := config.Get("app.db." + targetName + ".dsn")
+					poolSize := config.GetInt("app.db."+targetName+".poolSize", 20)
+					debug := config.GetBool("app.db."+targetName+".debug", false)
 
 					var err error
 					ret, err = creator(dsn)
 
 					if err == nil {
 
-						dbMap[name] = ret
+						dbMap[targetName] = ret
 
 						if debug {
 							ret.Debug()
@@ -71,7 +77,7 @@ func DBConnByName(name string) *gorm.DB {
 							}
 						}
 
-						fmt.Println("Conected to DB :", name)
+						fmt.Println("Conected to DB :", targetName)
 					} else {
 
 						fmt.Println("Error create DB :", err)
@@ -82,11 +88,6 @@ func DBConnByName(name string) *gorm.DB {
 	}
 
 	return ret
-}
-
-func DBConn() *gorm.DB {
-
-	return DBConnByName("default")
 }
 
 func init() {

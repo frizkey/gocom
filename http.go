@@ -1,4 +1,4 @@
-package ctrl
+package gocom
 
 import (
 	"fmt"
@@ -74,21 +74,28 @@ func init() {
 
 func getApp() App {
 
-	if app == nil {
+	appOnce.Do(func() {
 
-		appOnce.Do(func() {
+		appType := config.Get("app.http.type", "fiber")
 
-			appType := config.Get("app.http.type", "fiber")
+		creator := appCreatorMap[appType]
 
-			creator := appCreatorMap[appType]
-
-			if creator != nil {
-				app = creator()
-			}
-		})
-	}
+		if creator != nil {
+			app = creator()
+		}
+	})
 
 	return app
+}
+
+func Start() {
+
+	for _, ctrl := range controllerList {
+
+		ctrl.Init()
+	}
+
+	getApp().Start()
 }
 
 func GET(path string, handlers ...HandlerFunc) {
@@ -116,17 +123,7 @@ func DELETE(path string, handlers ...HandlerFunc) {
 	getApp().Delete(path, handlers...)
 }
 
-func Add(ctrl Controller) {
+func AddController(ctrl Controller) {
 
 	controllerList = append(controllerList, ctrl)
-}
-
-func Start() {
-
-	for _, ctrl := range controllerList {
-
-		ctrl.Init()
-	}
-
-	getApp().Start()
 }

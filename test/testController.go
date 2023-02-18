@@ -3,10 +3,8 @@ package main
 import (
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/adlindo/gocom"
-	"github.com/adlindo/gocom/ctrl"
 	"github.com/jinzhu/copier"
 )
 
@@ -15,33 +13,33 @@ type TestCtrl struct {
 
 func (o *TestCtrl) Init() {
 
-	ctrl.GET("/test/hello", o.getTestHello)
+	gocom.GET("/test/hello", o.getTestHello)
 
-	ctrl.GET("/test", o.TestMultiHandler, o.TestGet)
-	ctrl.GET("/test/:id", o.TestGetOne)
-	ctrl.POST("/test", o.TestPost)
-	ctrl.PUT("/test/:id", o.TestPut)
-	ctrl.PATCH("/test/:id", o.TestPut)
+	gocom.GET("/test", o.TestMultiHandler, o.TestGet)
+	gocom.GET("/test/:id", o.TestGetOne)
+	gocom.POST("/test", o.TestPost)
+	gocom.PUT("/test/:id", o.TestPut)
+	gocom.PATCH("/test/:id", o.TestPut)
 
-	ctrl.POST("/kv", o.postKV)
-	ctrl.GET("/kv", o.getKV)
-	ctrl.DELETE("/kv", o.delKV)
+	gocom.POST("/kv", o.postKV)
+	gocom.GET("/kv", o.getKV)
+	gocom.DELETE("/kv", o.delKV)
 }
 
-func (o *TestCtrl) getTestHello(ctx ctrl.Context) error {
+func (o *TestCtrl) getTestHello(ctx gocom.Context) error {
 
 	return ctx.SendResult("Hello World !")
 }
 
-func (o *TestCtrl) TestGet(ctx ctrl.Context) error {
+func (o *TestCtrl) TestGet(ctx gocom.Context) error {
 
-	lock := gocom.GetLock("Test", 0, 20*time.Second)
+	// lock := gocom.GetLock("Test", 0, 20*time.Second)
 
-	if lock != nil {
-		fmt.Println("Berhasil dapat lock")
-	} else {
-		fmt.Println("Gek Berhasil dapat lock")
-	}
+	// if lock != nil {
+	// 	fmt.Println("Berhasil dapat lock")
+	// } else {
+	// 	fmt.Println("Gek Berhasil dapat lock")
+	// }
 
 	ret := GetTestRepo().GetAll()
 
@@ -53,14 +51,14 @@ func (o *TestCtrl) TestGet(ctx ctrl.Context) error {
 	return ctx.SendResult(dtoRet)
 }
 
-func (o *TestCtrl) TestMultiHandler(ctx ctrl.Context) error {
+func (o *TestCtrl) TestMultiHandler(ctx gocom.Context) error {
 
 	fmt.Println("Dalam TestGet 2")
 
 	return ctx.Next()
 }
 
-func (o *TestCtrl) TestGetOne(ctx ctrl.Context) error {
+func (o *TestCtrl) TestGetOne(ctx gocom.Context) error {
 
 	id := ctx.Param("id")
 
@@ -76,7 +74,7 @@ func (o *TestCtrl) TestGetOne(ctx ctrl.Context) error {
 	return ctx.SendError(1001, "Data not found")
 }
 
-func (o *TestCtrl) TestPost(ctx ctrl.Context) error {
+func (o *TestCtrl) TestPost(ctx gocom.Context) error {
 
 	fmt.Println("Dalam TestPost")
 
@@ -96,7 +94,7 @@ func (o *TestCtrl) TestPost(ctx ctrl.Context) error {
 	return ctx.SendResult(dto)
 }
 
-func (o *TestCtrl) TestPut(ctx ctrl.Context) error {
+func (o *TestCtrl) TestPut(ctx gocom.Context) error {
 
 	fmt.Println("Dalam TestPut")
 
@@ -117,15 +115,15 @@ func (o *TestCtrl) TestPut(ctx ctrl.Context) error {
 	return ctx.SendResult(dto)
 }
 
-func (o *TestCtrl) delKV(ctx ctrl.Context) error {
-	gocom.KVConn().Del("TestKV")
+func (o *TestCtrl) delKV(ctx gocom.Context) error {
+	gocom.KV().Del("TestKV")
 
 	return ctx.SendResult(true)
 }
 
-func (o *TestCtrl) postKV(ctx ctrl.Context) error {
+func (o *TestCtrl) postKV(ctx gocom.Context) error {
 
-	kv := gocom.KVConn()
+	kv := gocom.KV()
 	data := &TestDTO{}
 	ctx.Bind(&data)
 
@@ -143,8 +141,8 @@ func (o *TestCtrl) postKV(ctx ctrl.Context) error {
 	}
 }
 
-func (o *TestCtrl) getKV(ctx ctrl.Context) error {
-	val := gocom.KVConn().Get("TestKV")
+func (o *TestCtrl) getKV(ctx gocom.Context) error {
+	val := gocom.KV().Get("TestKV")
 
 	return ctx.SendResult(val)
 }

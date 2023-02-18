@@ -10,7 +10,7 @@ import (
 
 // --------------------------
 
-type KV interface {
+type KVClient interface {
 	Set(key string, val interface{}, ttl ...time.Duration) error
 	SetNX(key string, val interface{}, ttl ...time.Duration) bool
 	Get(key string) interface{}
@@ -34,52 +34,49 @@ type KV interface {
 
 // --------------------------
 
-var kvMap map[string]KV = map[string]KV{}
+var kvMap map[string]KVClient = map[string]KVClient{}
 var kvOnce sync.Once
 var kvCreatorMap map[string]KVCreatorFunc = map[string]KVCreatorFunc{}
 
-type KVCreatorFunc func(url string) (KV, error)
+type KVCreatorFunc func(url string) (KVClient, error)
 
 func RegKVCreator(typeName string, creator KVCreatorFunc) {
 
 	kvCreatorMap[typeName] = creator
 }
 
-func KVConnByName(name string) KV {
+func KV(name ...string) KVClient {
 
-	if name == "" {
-		name = "default"
+	targetName := "default"
+
+	if len(name) > 0 {
+		targetName = name[0]
 	}
 
-	ret, ok := kvMap[name]
+	ret, ok := kvMap[targetName]
 
 	if !ok {
-		fmt.Println("aaaaaaaaaaaaa")
+
 		kvOnce.Do(func() {
 
-			fmt.Println("bbbbbbbbbbbbbbbbb")
-			if config.HasConfig("app.kv."+name+".type") && config.HasConfig("app.kv."+name+".url") {
+			if config.HasConfig("app.kv."+targetName+".type") && config.HasConfig("app.kv."+targetName+".url") {
 
-				kvType := config.Get("app.kv." + name + ".type")
+				kvType := config.Get("app.kv." + targetName + ".type")
 
 				creator, ok := kvCreatorMap[kvType]
 
-				fmt.Println("cccccccccccc")
 				if ok {
 
-					url := config.Get("app.kv." + name + ".url")
+					url := config.Get("app.kv." + targetName + ".url")
 
-					fmt.Println("ddddddddddddd")
 					var err error
 					ret, err = creator(url)
 
-					fmt.Println("eeeeeeeeeeeeeee")
-
 					if err == nil {
 
-						kvMap[name] = ret
+						kvMap[targetName] = ret
 
-						fmt.Println("Conected to KV :", name)
+						fmt.Println("Conected to KV :", targetName)
 					} else {
 
 						fmt.Println("Error create KV :", err)
@@ -90,8 +87,4 @@ func KVConnByName(name string) KV {
 	}
 
 	return ret
-}
-
-func KVConn() KV {
-	return KVConnByName("default")
 }

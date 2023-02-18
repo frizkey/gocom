@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/adlindo/gocom/ctrl"
+	"github.com/adlindo/gocom"
 )
 
 func main() {
 
 	fmt.Println("====>> ADL Common Lib Test <<====")
 
-	ctrl.Add(GetTestCtrl())
-	ctrl.Start()
+	gocom.AddController(GetTestCtrl())
+	gocom.Start()
 }
