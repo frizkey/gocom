@@ -123,7 +123,7 @@ func DELETE(path string, handlers ...HandlerFunc) {
 	getApp().Delete(path, handlers...)
 }
 
-func AddController(ctrl Controller) {
+func AddCtrl(ctrl Controller) {
 
 	controllerList = append(controllerList, ctrl)
 }

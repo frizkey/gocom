@@ -10,6 +10,10 @@ func main() {
 
 	fmt.Println("====>> ADL Common Lib Test <<====")
 
-	gocom.AddController(GetTestCtrl())
+	gocom.AddCtrl(GetTestCtrl())
+	gocom.AddCtrl(GetKeyValCtrl())
+	gocom.AddCtrl(GetSecretCtrl())
+	gocom.AddCtrl(GetJWTCtrl())
+
 	gocom.Start()
 }

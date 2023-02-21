@@ -20,10 +20,6 @@ func (o *TestCtrl) Init() {
 	gocom.POST("/test", o.TestPost)
 	gocom.PUT("/test/:id", o.TestPut)
 	gocom.PATCH("/test/:id", o.TestPut)
-
-	gocom.POST("/kv", o.postKV)
-	gocom.GET("/kv", o.getKV)
-	gocom.DELETE("/kv", o.delKV)
 }
 
 func (o *TestCtrl) getTestHello(ctx gocom.Context) error {
@@ -113,38 +109,6 @@ func (o *TestCtrl) TestPut(ctx gocom.Context) error {
 	copier.Copy(dto, mdl)
 
 	return ctx.SendResult(dto)
-}
-
-func (o *TestCtrl) delKV(ctx gocom.Context) error {
-	gocom.KV().Del("TestKV")
-
-	return ctx.SendResult(true)
-}
-
-func (o *TestCtrl) postKV(ctx gocom.Context) error {
-
-	kv := gocom.KV()
-	data := &TestDTO{}
-	ctx.Bind(&data)
-
-	if kv != nil {
-
-		err := kv.Set("TestKV", data.DataString)
-
-		if err == nil {
-			return ctx.SendResult(true)
-		}
-
-		return ctx.SendError(101, "Set error : "+err.Error())
-	} else {
-		return ctx.SendError(101, "invalid KV conn")
-	}
-}
-
-func (o *TestCtrl) getKV(ctx gocom.Context) error {
-	val := gocom.KV().Get("TestKV")
-
-	return ctx.SendResult(val)
 }
 
 //-----------------------------------------------

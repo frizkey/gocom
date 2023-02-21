@@ -42,18 +42,7 @@ func (o *RedisKV) SetNX(key string, val interface{}, ttl ...time.Duration) bool 
 	return false
 }
 
-func (o *RedisKV) Get(key string) interface{} {
-
-	cmd := o.client.Get(o.ctx, key)
-
-	if cmd.Err() == nil {
-		return cmd.Val()
-	}
-
-	return nil
-}
-
-func (o *RedisKV) GetString(key string) string {
+func (o *RedisKV) Get(key string) string {
 
 	cmd := o.client.Get(o.ctx, key)
 
@@ -92,62 +81,124 @@ func (o *RedisKV) Del(key string) error {
 
 func (o *RedisKV) LPush(key string, val interface{}) error {
 
+	cmd := o.client.LPush(o.ctx, key, val)
+
+	if cmd.Err() != nil {
+		return cmd.Err()
+	}
+
 	return nil
 }
 
-func (o *RedisKV) LPop(key string) interface{} {
+func (o *RedisKV) LPop(key string) string {
 
-	return nil
-}
+	cmd := o.client.LPop(o.ctx, key)
 
-func (o *RedisKV) LPopString(key string) string {
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
 
 	return ""
 }
 
 func (o *RedisKV) LPopInt(key string) int {
 
+	cmd := o.client.LPop(o.ctx, key)
+
+	if cmd.Err() == nil {
+		val, err := strconv.Atoi(cmd.Val())
+
+		if err == nil {
+			return val
+		}
+	}
+
 	return 0
 }
 
 func (o *RedisKV) RPush(key string, val interface{}) error {
 
+	cmd := o.client.RPush(o.ctx, key, val)
+
+	if cmd.Err() != nil {
+		return cmd.Err()
+	}
+
 	return nil
 }
 
-func (o *RedisKV) RPop(key string) interface{} {
+func (o *RedisKV) RPop(key string) string {
 
-	return nil
-}
+	cmd := o.client.RPop(o.ctx, key)
 
-func (o *RedisKV) RPopString(key string) string {
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
 
 	return ""
 }
 
 func (o *RedisKV) RPopInt(key string) int {
 
+	cmd := o.client.RPop(o.ctx, key)
+
+	if cmd.Err() == nil {
+		val, err := strconv.Atoi(cmd.Val())
+
+		if err == nil {
+			return val
+		}
+	}
+
 	return 0
 }
 
-func (o *RedisKV) Len(key string) int {
+func (o *RedisKV) Len(key string) int64 {
+
+	cmd := o.client.LLen(o.ctx, key)
+
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
 
 	return 0
 }
 
-func (o *RedisKV) AtIndex(key string, index int) interface{} {
+func (o *RedisKV) AtIndex(key string, index int64) string {
 
-	return nil
-}
+	cmd := o.client.LIndex(o.ctx, key, index)
 
-func (o *RedisKV) AtIndexString(key string, index int) string {
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
 
 	return ""
 }
 
-func (o *RedisKV) AtIndexInt(key string, index int) int {
+func (o *RedisKV) AtIndexInt(key string, index int64) int {
+
+	cmd := o.client.LIndex(o.ctx, key, index)
+
+	if cmd.Err() == nil {
+		val, err := strconv.Atoi(cmd.Val())
+
+		if err == nil {
+			return val
+		}
+	}
 
 	return 0
+}
+
+func (o *RedisKV) Range(key string, start int64, stop int64) []string {
+
+	cmd := o.client.LRange(o.ctx, key, start, stop)
+
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
+
+	return nil
 }
 
 //-----------------------------------------------------------------------

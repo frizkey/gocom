@@ -108,7 +108,7 @@ func (o *DistLock) Release() error {
 
 	if kv != nil {
 
-		if kv.GetString(o.Name) == o.ID {
+		if kv.Get(o.Name) == o.ID {
 
 			return kv.Del(o.Name)
 		}

@@ -13,23 +13,20 @@ import (
 type KVClient interface {
 	Set(key string, val interface{}, ttl ...time.Duration) error
 	SetNX(key string, val interface{}, ttl ...time.Duration) bool
-	Get(key string) interface{}
-	GetString(key string) string
+	Get(key string) string
 	GetInt(key string) int
 	Del(key string) error
 
 	LPush(key string, val interface{}) error
-	LPop(key string) interface{}
-	LPopString(key string) string
+	LPop(key string) string
 	LPopInt(key string) int
 	RPush(key string, val interface{}) error
-	RPop(key string) interface{}
-	RPopString(key string) string
+	RPop(key string) string
 	RPopInt(key string) int
-	Len(key string) int
-	AtIndex(key string, index int) interface{}
-	AtIndexString(key string, index int) string
-	AtIndexInt(key string, index int) int
+	Len(key string) int64
+	AtIndex(key string, index int64) string
+	AtIndexInt(key string, index int64) int
+	Range(key string, start int64, stop int64) []string
 }
 
 // --------------------------
