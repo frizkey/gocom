@@ -11,71 +11,71 @@ type KeyValCtrl struct {
 
 func (o *KeyValCtrl) Init() {
 
-	gocom.POST("/kv", o.postKV)
-	gocom.GET("/kv", o.getKV)
-	gocom.DELETE("/kv", o.delKV)
+	gocom.POST("/keyval", o.postKeyVal)
+	gocom.GET("/keyval", o.getKeyVal)
+	gocom.DELETE("/keyval", o.delKeyVal)
 
-	gocom.POST("/kvlist", o.postKVList)
-	gocom.GET("/kvlist", o.getKVList)
+	gocom.POST("/keyvallist", o.postKeyValList)
+	gocom.GET("/keyvallist", o.getKeyValList)
 }
 
-func (o *KeyValCtrl) getKVList(ctx gocom.Context) error {
+func (o *KeyValCtrl) getKeyValList(ctx gocom.Context) error {
 
-	val := gocom.KV().Range("TestKV", 0, gocom.KV().Len("TestKV"))
+	val := gocom.KeyVal().Range("TestKeyVal", 0, gocom.KeyVal().Len("TestKeyVal"))
 
 	return ctx.SendResult(val)
 }
 
-func (o *KeyValCtrl) postKVList(ctx gocom.Context) error {
+func (o *KeyValCtrl) postKeyValList(ctx gocom.Context) error {
 
-	kv := gocom.KV()
+	keyVal := gocom.KeyVal()
 	data := &TestDTO{}
 	ctx.Bind(&data)
 
-	if kv != nil {
+	if keyVal != nil {
 
-		err := kv.LPush("TestKVList", data.DataString)
+		err := keyVal.LPush("TestKeyValList", data.DataString)
 
 		if err == nil {
 			return ctx.SendResult(true)
 		}
 
-		return ctx.SendError(101, "Add list error : "+err.Error())
+		return ctx.SendError(gocom.NewError(101, "Add list error : "+err.Error()))
 	} else {
-		return ctx.SendError(101, "invalid KV conn")
+		return ctx.SendError(gocom.NewError(101, "invalid KeyVal conn"))
 	}
 }
 
-func (o *KeyValCtrl) delKV(ctx gocom.Context) error {
-	gocom.KV().Del("TestKV")
+func (o *KeyValCtrl) delKeyVal(ctx gocom.Context) error {
+	gocom.KeyVal().Del("TestKeyVal")
 
 	return ctx.SendResult(true)
 }
 
-func (o *KeyValCtrl) postKV(ctx gocom.Context) error {
+func (o *KeyValCtrl) postKeyVal(ctx gocom.Context) error {
 
-	kv := gocom.KV()
+	keyVal := gocom.KeyVal()
 	data := &TestDTO{}
 	ctx.Bind(&data)
 
-	if kv != nil {
+	if keyVal != nil {
 
-		err := kv.Set("TestKV", data.DataString)
+		err := keyVal.Set("TestKeyVal", data.DataString)
 
 		if err == nil {
 			return ctx.SendResult(true)
 		}
 
-		kv.Set("TestKVBool", data.DataBool)
+		keyVal.Set("TestKeyValBool", data.DataBool)
 
-		return ctx.SendError(101, "Set error : "+err.Error())
+		return ctx.SendError(gocom.NewError(101, "Set error : "+err.Error()))
 	} else {
-		return ctx.SendError(101, "invalid KV conn")
+		return ctx.SendError(gocom.NewError(101, "invalid KeyVal conn"))
 	}
 }
 
-func (o *KeyValCtrl) getKV(ctx gocom.Context) error {
-	val := gocom.KV().Get("TestKV") + " ==> " + gocom.KV().Get("TestKVBool")
+func (o *KeyValCtrl) getKeyVal(ctx gocom.Context) error {
+	val := gocom.KeyVal().Get("TestKeyVal") + " ==> " + gocom.KeyVal().Get("TestKeyValBool")
 
 	return ctx.SendResult(val)
 }

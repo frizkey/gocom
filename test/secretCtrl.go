@@ -23,7 +23,7 @@ func (o *SecretCtrl) getSecret(ctx gocom.Context) error {
 		return ctx.SendResult(val)
 	}
 
-	return ctx.SendError(100, "Error get secret", err)
+	return ctx.SendError(gocom.NewError(100, "Error get secret"+err.Error()))
 }
 
 //-------------------------------------------------------

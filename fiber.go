@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/adlindo/gocom/config"
+	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -75,15 +76,16 @@ func (o *FiberContext) SendResult(data interface{}) error {
 	return o.ctx.JSON(&Result{Code: 0, Messages: "Success", Data: data})
 }
 
-func (o *FiberContext) SendError(code int, message string, data ...interface{}) error {
+func (o *FiberContext) SendPaged(data interface{}, currPage, totalPage int) error {
 
-	ret := &Result{Code: code, Messages: message}
+	return o.ctx.JSON(&ResultPaged{Result: Result{Code: 0, Messages: "Success"},
+		CurrPage:  currPage,
+		TotalPage: totalPage})
+}
 
-	if len(data) > 0 {
-		ret.Data = data[0]
-	}
+func (o *FiberContext) SendError(err *CodedError) error {
 
-	return o.ctx.Status(fiber.StatusBadRequest).JSON(ret)
+	return o.ctx.Status(fiber.StatusBadRequest).JSON(&Result{Code: err.Code, Messages: err.Message})
 }
 
 func (o *FiberContext) SendJSON(data interface{}) error {
@@ -171,6 +173,10 @@ func (o *FiberApp) Start() {
 	port := config.GetInt("app.http.port")
 
 	totalAddr := addr + ":" + strconv.Itoa(port)
+
+	prometheus := fiberprometheus.New("service")
+	prometheus.RegisterAt(o.app, "/metrics")
+	o.app.Use(prometheus.Middleware)
 
 	o.app.Listen(totalAddr)
 }

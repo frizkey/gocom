@@ -67,7 +67,7 @@ func (o *TestCtrl) TestGetOne(ctx gocom.Context) error {
 		return ctx.SendResult(dtoRet)
 	}
 
-	return ctx.SendError(1001, "Data not found")
+	return ctx.SendError(gocom.NewError(1001, "Data not found"))
 }
 
 func (o *TestCtrl) TestPost(ctx gocom.Context) error {

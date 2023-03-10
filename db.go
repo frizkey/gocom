@@ -1,10 +1,10 @@
 package gocom
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/adlindo/gocom/config"
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -77,10 +77,10 @@ func DB(name ...string) *gorm.DB {
 							}
 						}
 
-						fmt.Println("Conected to DB :", targetName)
+						Logger().Info("Conected to DB", zap.Any("dbname", targetName))
 					} else {
 
-						fmt.Println("Error create DB :", err)
+						Logger().Info("Error Conected to DB", zap.Error(err))
 					}
 				}
 			}

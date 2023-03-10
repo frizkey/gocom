@@ -1,7 +1,6 @@
 package gocom
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/adlindo/gocom/config"
@@ -44,10 +43,11 @@ type Context interface {
 	Get(key string) interface{}
 	SendString(data string) error
 	SendJSON(data interface{}) error
+	SendPaged(data interface{}, currPage, totalPage int) error
 	SendFile(filePath string, fileName string) error
 	SendFileBytes(data []byte, fileName string) error
 	SendResult(data interface{}) error
-	SendError(code int, message string, data ...interface{}) error
+	SendError(err *CodedError) error
 	Next() error
 }
 
@@ -55,6 +55,12 @@ type Result struct {
 	Code     int         `json:"code"`
 	Messages string      `json:"message"`
 	Data     interface{} `json:"data"`
+}
+
+type ResultPaged struct {
+	Result
+	CurrPage  int `json:"currPage"`
+	TotalPage int `json:"totalPage"`
 }
 
 type HandlerFunc func(ctx Context) error
@@ -66,8 +72,6 @@ type Controller interface {
 // Funcs ----------------------------------------
 
 func init() {
-	fmt.Println("init controller")
-
 	config.SetDefault("app.http.port", 9494)
 	config.SetDefault("app.http.address", "")
 }

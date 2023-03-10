@@ -31,16 +31,16 @@ func GetLock(name string, maxWait time.Duration, ttl time.Duration) *DistLock {
 		ttl = 10 * time.Minute
 	}
 
-	// check if KV avail
-	kv := KV()
+	// check if KeyVal avail
+	keyVal := KeyVal()
 
 	maxTime := time.Now().Add(maxWait)
 
-	if kv != nil {
+	if keyVal != nil {
 
 		for {
 
-			lockStat := kv.SetNX(ret.Name, ret.ID, ttl)
+			lockStat := keyVal.SetNX(ret.Name, ret.ID, ttl)
 
 			if !lockStat {
 				if time.Now().After(maxTime) {
@@ -103,14 +103,14 @@ func ReleaseLock(lock *DistLock) error {
 
 func (o *DistLock) Release() error {
 
-	// check if KV avail
-	kv := KV()
+	// check if KeyVal avail
+	keyVal := KeyVal()
 
-	if kv != nil {
+	if keyVal != nil {
 
-		if kv.Get(o.Name) == o.ID {
+		if keyVal.Get(o.Name) == o.ID {
 
-			return kv.Del(o.Name)
+			return keyVal.Del(o.Name)
 		}
 
 		return errors.New("not active lock")

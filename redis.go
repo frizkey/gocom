@@ -2,18 +2,23 @@ package gocom
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
+	"github.com/adjust/rmq/v5"
 	"github.com/redis/go-redis/v9"
 )
 
-type RedisKV struct {
+// KeyVal ------------------------------------------------------------------------------
+
+type RedisKeyVal struct {
 	ctx    context.Context
 	client *redis.Client
 }
 
-func (o *RedisKV) Set(key string, val interface{}, ttl ...time.Duration) error {
+func (o *RedisKeyVal) Set(key string, val interface{}, ttl ...time.Duration) error {
 
 	targetTTL := time.Second * 0
 
@@ -24,7 +29,7 @@ func (o *RedisKV) Set(key string, val interface{}, ttl ...time.Duration) error {
 	return o.client.Set(o.ctx, key, val, targetTTL).Err()
 }
 
-func (o *RedisKV) SetNX(key string, val interface{}, ttl ...time.Duration) bool {
+func (o *RedisKeyVal) SetNX(key string, val interface{}, ttl ...time.Duration) bool {
 
 	targetTTL := time.Second * 0
 
@@ -42,7 +47,7 @@ func (o *RedisKV) SetNX(key string, val interface{}, ttl ...time.Duration) bool 
 	return false
 }
 
-func (o *RedisKV) Get(key string) string {
+func (o *RedisKeyVal) Get(key string) string {
 
 	cmd := o.client.Get(o.ctx, key)
 
@@ -53,7 +58,7 @@ func (o *RedisKV) Get(key string) string {
 	return ""
 }
 
-func (o *RedisKV) GetInt(key string) int {
+func (o *RedisKeyVal) GetInt(key string) int {
 
 	cmd := o.client.Get(o.ctx, key)
 
@@ -68,7 +73,7 @@ func (o *RedisKV) GetInt(key string) int {
 	return 0
 }
 
-func (o *RedisKV) Del(key string) error {
+func (o *RedisKeyVal) Del(key string) error {
 
 	cmd := o.client.Del(o.ctx, key)
 
@@ -79,7 +84,7 @@ func (o *RedisKV) Del(key string) error {
 	return nil
 }
 
-func (o *RedisKV) LPush(key string, val interface{}) error {
+func (o *RedisKeyVal) LPush(key string, val interface{}) error {
 
 	cmd := o.client.LPush(o.ctx, key, val)
 
@@ -90,7 +95,7 @@ func (o *RedisKV) LPush(key string, val interface{}) error {
 	return nil
 }
 
-func (o *RedisKV) LPop(key string) string {
+func (o *RedisKeyVal) LPop(key string) string {
 
 	cmd := o.client.LPop(o.ctx, key)
 
@@ -101,7 +106,7 @@ func (o *RedisKV) LPop(key string) string {
 	return ""
 }
 
-func (o *RedisKV) LPopInt(key string) int {
+func (o *RedisKeyVal) LPopInt(key string) int {
 
 	cmd := o.client.LPop(o.ctx, key)
 
@@ -116,7 +121,7 @@ func (o *RedisKV) LPopInt(key string) int {
 	return 0
 }
 
-func (o *RedisKV) RPush(key string, val interface{}) error {
+func (o *RedisKeyVal) RPush(key string, val interface{}) error {
 
 	cmd := o.client.RPush(o.ctx, key, val)
 
@@ -127,7 +132,7 @@ func (o *RedisKV) RPush(key string, val interface{}) error {
 	return nil
 }
 
-func (o *RedisKV) RPop(key string) string {
+func (o *RedisKeyVal) RPop(key string) string {
 
 	cmd := o.client.RPop(o.ctx, key)
 
@@ -138,7 +143,7 @@ func (o *RedisKV) RPop(key string) string {
 	return ""
 }
 
-func (o *RedisKV) RPopInt(key string) int {
+func (o *RedisKeyVal) RPopInt(key string) int {
 
 	cmd := o.client.RPop(o.ctx, key)
 
@@ -153,7 +158,7 @@ func (o *RedisKV) RPopInt(key string) int {
 	return 0
 }
 
-func (o *RedisKV) Len(key string) int64 {
+func (o *RedisKeyVal) Len(key string) int64 {
 
 	cmd := o.client.LLen(o.ctx, key)
 
@@ -164,7 +169,7 @@ func (o *RedisKV) Len(key string) int64 {
 	return 0
 }
 
-func (o *RedisKV) AtIndex(key string, index int64) string {
+func (o *RedisKeyVal) AtIndex(key string, index int64) string {
 
 	cmd := o.client.LIndex(o.ctx, key, index)
 
@@ -175,7 +180,7 @@ func (o *RedisKV) AtIndex(key string, index int64) string {
 	return ""
 }
 
-func (o *RedisKV) AtIndexInt(key string, index int64) int {
+func (o *RedisKeyVal) AtIndexInt(key string, index int64) int {
 
 	cmd := o.client.LIndex(o.ctx, key, index)
 
@@ -190,7 +195,7 @@ func (o *RedisKV) AtIndexInt(key string, index int64) int {
 	return 0
 }
 
-func (o *RedisKV) Range(key string, start int64, stop int64) []string {
+func (o *RedisKeyVal) Range(key string, start int64, stop int64) []string {
 
 	cmd := o.client.LRange(o.ctx, key, start, stop)
 
@@ -201,18 +206,99 @@ func (o *RedisKV) Range(key string, start int64, stop int64) []string {
 	return nil
 }
 
-//-----------------------------------------------------------------------
+// Queue ------------------------------------------------------------------------------
+
+type RedisQueue struct {
+	conn  rmq.Connection
+	queue map[string]rmq.Queue
+}
+
+func (o *RedisQueue) Publish(name string, payload interface{}) error {
+
+	queue, ok := o.queue[name]
+
+	if !ok {
+
+		var err error
+		queue, err = o.conn.OpenQueue("name")
+
+		if err != nil {
+			return err
+		}
+
+		o.queue[name] = queue
+	}
+
+	payloadString := ""
+
+	switch payload.(type) {
+	case int:
+	case int16:
+	case int32:
+	case int64:
+	case string:
+	case float32:
+	case float64:
+	case bool:
+		payloadString = fmt.Sprintf("%v", payload)
+	default:
+		payloadByte, err := json.Marshal(payload)
+
+		if err != nil {
+			return err
+		}
+
+		payloadString = string(payloadByte)
+	}
+
+	queue.Publish(payloadString)
+	return nil
+}
+
+func (o *RedisQueue) Consume(name string, consumer QueueConsumerFunc) error {
+
+	return nil
+}
+
+// Init -------------------------------------------------------------------------------
 
 func init() {
-	RegKVCreator("redis", func(url string) (KVClient, error) {
-		ret := &RedisKV{
+	RegKeyValCreator("redis", func(url string) (KeyValClient, error) {
+		ret := &RedisKeyVal{
 			ctx: context.Background(),
 		}
 
 		opt, err := redis.ParseURL(url)
 
-		if err == nil {
-			ret.client = redis.NewClient(opt)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse redis url %w", err)
+		}
+
+		ret.client = redis.NewClient(opt)
+
+		if err != nil {
+			return nil, fmt.Errorf("unable to connect redis %w", err)
+		}
+
+		return ret, nil
+	})
+
+	RegQueueCreator("redis", func(url string) (QueueClient, error) {
+
+		ret := &RedisQueue{
+			queue: map[string]rmq.Queue{},
+		}
+
+		opt, err := redis.ParseURL(url)
+
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse redis url %w", err)
+		}
+
+		ret.conn, err = rmq.OpenConnection("queue", "tcp", opt.Addr, opt.DB, nil)
+
+		if err != nil {
+			return nil, fmt.Errorf("unable to connect redis %w", err)
 		}
 
 		return ret, nil

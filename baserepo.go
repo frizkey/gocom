@@ -23,6 +23,11 @@ func (o *BaseRepo) Update(value interface{}) *gorm.DB {
 	return DB(o.ConnName).Save(value)
 }
 
+func (o *BaseRepo) Delete(value interface{}) *gorm.DB {
+
+	return DB(o.ConnName).Delete(value)
+}
+
 func (o *BaseRepo) First(dest interface{}, conds ...interface{}) *gorm.DB {
 
 	return DB(o.ConnName).First(dest, conds...)

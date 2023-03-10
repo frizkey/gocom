@@ -31,7 +31,7 @@ func (o *JWTCtrl) getJWT(ctx gocom.Context) error {
 		return ctx.SendResult(val)
 	}
 
-	return ctx.SendError(100, "Error get JWT", err)
+	return ctx.SendError(gocom.NewError(100, "Error get JWT :"+err.Error()))
 }
 
 func (o *JWTCtrl) postJWT(ctx gocom.Context) error {
@@ -47,7 +47,7 @@ func (o *JWTCtrl) postJWT(ctx gocom.Context) error {
 		return ctx.SendResult("VALID : " + val["satu"].(string))
 	}
 
-	return ctx.SendError(100, "Invalid JWT "+err.Error())
+	return ctx.SendError(gocom.NewError(100, "Invalid JWT "+err.Error()))
 }
 
 //-------------------------------------------------------

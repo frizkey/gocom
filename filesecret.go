@@ -6,23 +6,32 @@ import (
 	"strings"
 )
 
+var fileSecretCache map[string]string = map[string]string{}
+
 func FileSecret(dsn string, key string) (string, error) {
 
-	targetFile := dsn
+	ret, ok := fileSecretCache[dsn+"_"+key]
 
-	if strings.HasSuffix(targetFile, "/") {
-		targetFile += key
-	} else {
-		targetFile += "/" + key
+	if !ok {
+		targetFile := dsn
+
+		if strings.HasSuffix(targetFile, "/") {
+			targetFile += key
+		} else {
+			targetFile += "/" + key
+		}
+
+		byteA, err := ioutil.ReadFile(targetFile)
+
+		if err != nil {
+			return "", fmt.Errorf("read secret file error : %w", err)
+		}
+
+		ret = string(byteA)
+		fileSecretCache[dsn+"_"+key] = ret
 	}
 
-	byteA, err := ioutil.ReadFile(targetFile)
-
-	if err != nil {
-		return "", fmt.Errorf("read secret file error : %w", err)
-	}
-
-	return string(byteA), nil
+	return ret, nil
 }
 
 func init() {
