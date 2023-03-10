@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"ada-asia.com/bsp/otpserver/gocom/config"
+	"github.com/adlindo/gocom/config"
 )
 
 var pubSubMap map[string]PubSubClient = map[string]PubSubClient{}
