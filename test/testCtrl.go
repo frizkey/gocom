@@ -29,7 +29,7 @@ func (o *TestCtrl) getTestHello(ctx gocom.Context) error {
 
 func (o *TestCtrl) TestGet(ctx gocom.Context) error {
 
-	ctx.Set("aa", 111)
+	ctx.Set("aa", "111")
 	fmt.Println("====>", ctx.Get("aa"))
 	// lock := gocom.GetLock("Test", 0, 20*time.Second)
 

@@ -39,8 +39,8 @@ type Context interface {
 	Bind(target interface{}) error
 	SetHeader(key string, value string)
 	GetHeader(key string) string
-	Set(key string, value interface{})
-	Get(key string) interface{}
+	Set(key string, value string)
+	Get(key string) string
 	SendString(data string) error
 	SendJSON(data interface{}) error
 	SendPaged(data interface{}, currPage, totalPage int) error

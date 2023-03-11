@@ -1,7 +1,6 @@
 package gocom
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -14,8 +13,7 @@ import (
 // FiberContext -------------------------------------------
 
 type FiberContext struct {
-	ctx     *fiber.Ctx
-	dataMap map[string]interface{}
+	ctx *fiber.Ctx
 }
 
 func (o *FiberContext) Status(code int) Context {
@@ -59,18 +57,14 @@ func (o *FiberContext) GetHeader(key string) string {
 	return o.ctx.Get(key)
 }
 
-func (o *FiberContext) Set(key string, value interface{}) {
-	o.dataMap[key] = value
+func (o *FiberContext) Set(key string, value string) {
 
-	fmt.Println("set ", key, value)
-	fmt.Printf("set data ===> %+v\n", o.dataMap)
+	o.ctx.Request().Header.Set(key, value)
 }
 
-func (o *FiberContext) Get(key string) interface{} {
+func (o *FiberContext) Get(key string) string {
 
-	fmt.Println("get ", key)
-	fmt.Printf("get data ===> %+v\n", o.dataMap)
-	return o.dataMap[key]
+	return o.ctx.Get(key)
 }
 
 func (o *FiberContext) SendString(data string) error {
@@ -133,7 +127,7 @@ func toFiberHandler(handler HandlerFunc) fiber.Handler {
 
 	return func(ctx *fiber.Ctx) error {
 
-		return handler(&FiberContext{ctx: ctx, dataMap: map[string]interface{}{}})
+		return handler(&FiberContext{ctx: ctx})
 	}
 }
 
