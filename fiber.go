@@ -78,7 +78,7 @@ func (o *FiberContext) SendResult(data interface{}) error {
 
 func (o *FiberContext) SendPaged(data interface{}, currPage, totalPage int) error {
 
-	return o.ctx.JSON(&ResultPaged{Result: Result{Code: 0, Messages: "Success"},
+	return o.ctx.JSON(&ResultPaged{Result: Result{Code: 0, Messages: "Success", Data: data},
 		CurrPage:  currPage,
 		TotalPage: totalPage})
 }
