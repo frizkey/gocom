@@ -126,7 +126,7 @@ func toFiberHandler(handler HandlerFunc) fiber.Handler {
 
 	return func(ctx *fiber.Ctx) error {
 
-		return handler(&FiberContext{ctx: ctx})
+		return handler(&FiberContext{ctx: ctx, dataMap: map[string]interface{}{}})
 	}
 }
 
