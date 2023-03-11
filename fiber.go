@@ -1,6 +1,7 @@
 package gocom
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -60,9 +61,15 @@ func (o *FiberContext) GetHeader(key string) string {
 
 func (o *FiberContext) Set(key string, value interface{}) {
 	o.dataMap[key] = value
+
+	fmt.Println("set ", key, value)
+	fmt.Printf("set data ===> %+v\n", o.dataMap)
 }
 
 func (o *FiberContext) Get(key string) interface{} {
+
+	fmt.Println("get ", key)
+	fmt.Printf("get data ===> %+v\n", o.dataMap)
 	return o.dataMap[key]
 }
 
