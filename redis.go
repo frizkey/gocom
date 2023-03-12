@@ -206,7 +206,14 @@ func (o *RedisKeyVal) Range(key string, start int64, stop int64) []string {
 	return nil
 }
 
-func (o *RedisKeyVal) HSet(key string, keyval ...interface{}) error {
+func (o *RedisKeyVal) HSet(key string, values map[string]interface{}) error {
+
+	keyval := []interface{}{}
+
+	for name, val := range values {
+		keyval = append(keyval, name)
+		keyval = append(keyval, val)
+	}
 
 	return o.client.HSet(o.ctx, key, keyval...).Err()
 }

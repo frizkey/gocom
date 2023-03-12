@@ -28,7 +28,7 @@ type KeyValClient interface {
 	AtIndexInt(key string, index int64) int
 	Range(key string, start int64, stop int64) []string
 
-	HSet(key string, keyval ...interface{}) error
+	HSet(key string, values map[string]interface{}) error
 	HGet(key, field string) string
 	HGetAll(key string) map[string]string
 	HDel(key string, fields ...string) error
