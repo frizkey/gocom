@@ -206,6 +206,43 @@ func (o *RedisKeyVal) Range(key string, start int64, stop int64) []string {
 	return nil
 }
 
+func (o *RedisKeyVal) HSet(key string, keyval ...interface{}) error {
+
+	return o.client.HSet(o.ctx, key, keyval...).Err()
+}
+
+func (o *RedisKeyVal) HGet(key, field string) string {
+
+	cmd := o.client.HGet(o.ctx, key, field)
+
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
+
+	return ""
+}
+
+func (o *RedisKeyVal) HGetAll(key string) map[string]string {
+
+	cmd := o.client.HGetAll(o.ctx, key)
+
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
+
+	return nil
+}
+
+func (o *RedisKeyVal) HDel(key string, fields ...string) error {
+
+	return o.client.HDel(o.ctx, key, fields...).Err()
+}
+
+func (o *RedisKeyVal) Expire(key string, ttl time.Duration) error {
+
+	return o.client.Expire(o.ctx, key, ttl).Err()
+}
+
 // Queue ------------------------------------------------------------------------------
 
 type RedisQueue struct {
