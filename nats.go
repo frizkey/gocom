@@ -48,7 +48,7 @@ func (o *NatsPubSubClient) Subscribe(subject string, eventHandler PubSubEventHan
 
 			if err != nil {
 
-				fmt.Println("=====> SYSTEM PANIC WHEN PROCESS NATS MSG :", err)
+				fmt.Println("=====> SYSTEM PANIC WHEN PROCESS NATS MSG :", subject, " : ", err)
 			}
 		}()
 
@@ -66,7 +66,7 @@ func (o *NatsPubSubClient) QueueSubscribe(subject string, queue string, eventHan
 
 			if err != nil {
 
-				fmt.Println("=====> SYSTEM PANIC WHEN PROCESS NATS QUEUE MSG :", err)
+				fmt.Println("=====> SYSTEM PANIC WHEN PROCESS NATS QUEUE MSG :", subject, ", Queue : ", queue, ", Error :", err)
 			}
 		}()
 
