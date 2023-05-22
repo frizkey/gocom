@@ -276,14 +276,7 @@ func (o *RedisQueue) Publish(name string, payload interface{}) error {
 	payloadString := ""
 
 	switch payload.(type) {
-	case int:
-	case int16:
-	case int32:
-	case int64:
-	case string:
-	case float32:
-	case float64:
-	case bool:
+	case int, int16, int32, int64, string, float32, float64, bool:
 		payloadString = fmt.Sprintf("%v", payload)
 	default:
 		payloadByte, err := json.Marshal(payload)

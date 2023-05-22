@@ -3,6 +3,7 @@ package gocom
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/nats-io/nats.go"
 )
@@ -17,14 +18,7 @@ func (o *NatsPubSubClient) Publish(subject string, msg interface{}) error {
 	var err error
 
 	switch msg.(type) {
-	case int:
-	case int16:
-	case int32:
-	case int64:
-	case string:
-	case float32:
-	case float64:
-	case bool:
+	case int, int16, int32, int64, string, float32, float64, bool:
 		msgString := fmt.Sprintf("%v", msg)
 		msgByte = []byte(msgString)
 	default:
@@ -36,6 +30,37 @@ func (o *NatsPubSubClient) Publish(subject string, msg interface{}) error {
 	}
 
 	return o.conn.Publish(subject, msgByte)
+}
+
+func (o *NatsPubSubClient) Request(subject string, msg interface{}, timeOut ...time.Duration) (string, error) {
+
+	var msgByte []byte
+	var err error
+
+	switch msg.(type) {
+	case int, int16, int32, int64, string, float32, float64, bool:
+		msgString := fmt.Sprintf("%v", msg)
+		msgByte = []byte(msgString)
+	default:
+		msgByte, err = json.Marshal(msg)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	targetTimeout := 20 * time.Second
+
+	if len(timeOut) > 0 {
+		targetTimeout = timeOut[0]
+	}
+
+	ret, err := o.conn.Request(subject, msgByte, targetTimeout)
+
+	if err != nil {
+		return "", err
+	}
+
+	return string(ret.Data), nil
 }
 
 func (o *NatsPubSubClient) Subscribe(subject string, eventHandler PubSubEventHandler) {
@@ -53,6 +78,25 @@ func (o *NatsPubSubClient) Subscribe(subject string, eventHandler PubSubEventHan
 		}()
 
 		eventHandler(subject, string(msg.Data))
+	})
+}
+
+func (o *NatsPubSubClient) RequestSubscribe(subject string, eventHandler PubSubReqEventHandler) {
+
+	o.conn.Subscribe(subject, func(msg *nats.Msg) {
+
+		defer func() {
+
+			err := recover()
+
+			if err != nil {
+
+				fmt.Println("=====> SYSTEM PANIC WHEN PROCESS NATS REPLY MSG :", subject, " : ", err)
+			}
+		}()
+
+		ret := eventHandler(subject, string(msg.Data))
+		msg.Respond([]byte(ret))
 	})
 }
 

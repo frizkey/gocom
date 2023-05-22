@@ -3,6 +3,7 @@ package gocom
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/adlindo/gocom/config"
 )
@@ -13,12 +14,15 @@ var pubSubCreatorMap map[string]PubSubCreatorFunc = map[string]PubSubCreatorFunc
 
 type PubSubClient interface {
 	Publish(subject string, msg interface{}) error
+	Request(subject string, msg interface{}, timeOut ...time.Duration) (string, error)
 	Subscribe(subject string, eventHandler PubSubEventHandler)
+	RequestSubscribe(subject string, eventHandler PubSubReqEventHandler)
 	QueueSubscribe(subject string, queue string, eventHandler PubSubEventHandler)
 }
 
 type PubSubCreatorFunc func(connString string) (PubSubClient, error)
 type PubSubEventHandler func(name string, msg string)
+type PubSubReqEventHandler func(name string, msg string) string
 
 func RegPubSubCreator(typeName string, creator PubSubCreatorFunc) {
 
@@ -31,6 +35,10 @@ func PubSub(name ...string) PubSubClient {
 
 	if len(name) > 0 {
 		targetName = name[0]
+	}
+
+	if targetName == "" {
+		targetName = "default"
 	}
 
 	ret, ok := pubSubMap[targetName]
