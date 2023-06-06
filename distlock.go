@@ -148,6 +148,8 @@ func GetLock(name string, maxWait time.Duration, ttl time.Duration) *DistLock {
 
 	if keyVal != nil {
 
+		ret.Mode = "keyval"
+
 		for {
 
 			lockStat := keyVal.SetNX(ret.Name, ret.ID, ttl)
@@ -159,6 +161,9 @@ func GetLock(name string, maxWait time.Duration, ttl time.Duration) *DistLock {
 				}
 				time.Sleep(1 * time.Second)
 			} else {
+
+				ret.Expire = time.Now().Add(ttl)
+
 				break
 			}
 		}
@@ -175,12 +180,13 @@ func GetLock(name string, maxWait time.Duration, ttl time.Duration) *DistLock {
 				db.AutoMigrate(&DistLock{})
 			})
 
-			ret.Expire = time.Now().Add(ttl)
+			ret.Mode = "db"
 			existing := &DistLock{}
 
 			for {
 				db.Exec("delete from dist_locks where expire < ?", time.Now())
 
+				ret.Expire = time.Now().Add(ttl)
 				if db.Create(ret).Error == nil {
 
 					// check if we get the ownership
