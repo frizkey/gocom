@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/adlindo/gocom/secret"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -15,7 +16,7 @@ func NewJWT(data map[string]interface{}, ttl ...time.Duration) (string, error) {
 		targetTTL = ttl[0]
 	}
 
-	pem, err := GetSecret("app.jwt.privatekey")
+	pem, err := secret.Get("app.jwt.privatekey")
 
 	if err != nil {
 		return "", fmt.Errorf("Get jwt private key error: %w", err)
@@ -51,7 +52,7 @@ func NewJWT(data map[string]interface{}, ttl ...time.Duration) (string, error) {
 
 func ValidateJWT(token string) (map[string]interface{}, error) {
 
-	pem, err := GetSecret("app.jwt.publickey")
+	pem, err := secret.Get("app.jwt.publickey")
 
 	if err != nil {
 		return nil, fmt.Errorf("Get jwt public key error: %w", err)

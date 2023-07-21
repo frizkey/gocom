@@ -15,7 +15,6 @@ func main() {
 	gocom.AddCtrl(GetSecretCtrl())
 	gocom.AddCtrl(GetJWTCtrl())
 	gocom.AddCtrl(GetPubSubCtrl())
-	gocom.AddCtrl(GetDistObjCtrl())
 	gocom.AddCtrl(GetDistLockCtrl())
 
 	gocom.Start()

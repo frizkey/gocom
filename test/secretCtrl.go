@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/adlindo/gocom"
+	"github.com/adlindo/gocom/secret"
 )
 
 type SecretCtrl struct {
@@ -16,7 +17,7 @@ func (o *SecretCtrl) Init() {
 
 func (o *SecretCtrl) getSecret(ctx gocom.Context) error {
 
-	val, err := gocom.GetSecret("app.jwt.publickey")
+	val, err := secret.Get("app.jwt.publickey")
 
 	if err == nil {
 
