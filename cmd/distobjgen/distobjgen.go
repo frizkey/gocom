@@ -7,6 +7,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"strings"
 )
 
 var ifaceName string
@@ -14,6 +15,35 @@ var ifaceName string
 func init() {
 
 	flag.StringVar(&ifaceName, "src", "", "input interface name")
+}
+
+func getTypeStr(field ast.Expr) string {
+
+	ident, ok := field.(*ast.Ident)
+
+	if ok {
+		return ident.Name
+	}
+
+	_, ok = field.(*ast.InterfaceType)
+
+	if ok {
+		return "interface{}"
+	}
+
+	arr, ok := field.(*ast.ArrayType)
+
+	if ok {
+		return "[]" + getTypeStr(arr.Elt)
+	}
+
+	mapType, ok := field.(*ast.MapType)
+
+	if ok {
+		return "map[" + getTypeStr(mapType.Key) + "]" + getTypeStr(mapType.Value)
+	}
+
+	return ""
 }
 
 func main() {
@@ -77,13 +107,28 @@ func main() {
 import "github.com/adlindo/gocom/distobj"
 
 type ` + proxyName + ` struct {
+	className string
 	prefix string
 }
 
-func Get` + proxyName + `(prefix string) *` + proxyName + ` {
+var __` + proxyName + `Map map[string]*` + proxyName + ` = map[string]*` + proxyName + `{}
 
-	ret = &` + proxyName + `{}
-	ret.prefix = prefix
+func Get` + proxyName + `(prefix ...string) *` + proxyName + ` {
+
+	targetPrefix := ""
+	if len(prefix) > 0 {
+		targetPrefix = prefix[0]
+	}
+
+	ret, ok := __` + proxyName + `Map[targetPrefix]
+
+	if !ok {
+		ret = &` + proxyName + `{}
+		ret.className = "` + ifaceName + `"
+		ret.prefix = targetPrefix
+
+		__` + proxyName + `Map[targetPrefix] = ret
+	}
 
 	return ret
 }
@@ -107,6 +152,9 @@ func Get` + proxyName + `(prefix string) *` + proxyName + ` {
 						mtdName := field.Names[0].Name
 						paramList := map[string]string{}
 						resultList := []string{}
+						errorResult := ""
+						normalResult := ""
+						resultConverter := ""
 
 						astMtd, ok := field.Type.(*ast.FuncType)
 
@@ -117,28 +165,62 @@ func Get` + proxyName + `(prefix string) *` + proxyName + ` {
 						//params
 						for _, param := range astMtd.Params.List {
 
-							paramType, ok := param.Type.(*ast.Ident)
-
-							if !ok {
-								continue
-							}
+							paramType := getTypeStr(param.Type)
 
 							for _, name := range param.Names {
 
-								paramList[name.Name] = paramType.Name
+								paramList[name.Name] = paramType
 							}
 						}
 
 						//result
-						for _, result := range astMtd.Results.List {
+						for i, result := range astMtd.Results.List {
 
-							typeIdent, ok := result.Type.(*ast.Ident)
+							typeStr := getTypeStr(result.Type)
 
-							if !ok {
-								continue
+							switch typeStr {
+							case "string":
+								errorResult += ", \"\""
+								resultConverter += fmt.Sprintf("\n\tret%d := distobj.ToStr(ret[%d])", i, i)
+							case "int":
+								errorResult += ", 0"
+								resultConverter += fmt.Sprintf("\n\tret%d := distobj.ToInt(ret[%d])", i, i)
+							case "int16":
+								errorResult += ", 0"
+								resultConverter += fmt.Sprintf("\n\tret%d := distobj.ToInt16(ret[%d])", i, i)
+							case "int32":
+								errorResult += ", 0"
+								resultConverter += fmt.Sprintf("\n\tret%d := distobj.ToInt32(ret[%d])", i, i)
+							case "int64":
+								errorResult += ", 0"
+								resultConverter += fmt.Sprintf("\n\tret%d := distobj.ToInt64(ret[%d])", i, i)
+							case "float32":
+								errorResult += ", 0"
+								resultConverter += fmt.Sprintf("\n\tret%d := distobj.ToFloat32(ret[%d])", i, i)
+							case "float64":
+								errorResult += ", 0"
+								resultConverter += fmt.Sprintf("\n\tret%d := distobj.ToFloat64(ret[%d])", i, i)
+							case "bool":
+								errorResult += ", false"
+								resultConverter += fmt.Sprintf("\n\tret%d := distobj.ToBool(ret[%d])", i, i)
+							case "error":
+								errorResult += ", err"
+								resultConverter += fmt.Sprintf("\n\tret%d := distobj.ToErr(ret[%d])", i, i)
+							case "interface{}":
+								errorResult += ", nil"
+								resultConverter += fmt.Sprintf("\n\tret%d := ret[%d]", i, i)
+							default:
+								if strings.HasPrefix(typeStr, "[]") ||
+									strings.HasPrefix(typeStr, "map[") ||
+									strings.HasPrefix(typeStr, "*") {
+									errorResult += ", nil"
+								} else {
+									errorResult += ", " + typeStr + "{}"
+								}
 							}
 
-							resultList = append(resultList, typeIdent.Name)
+							normalResult += fmt.Sprintf(", ret%d", i)
+							resultList = append(resultList, typeStr)
 						}
 
 						// start generate method ----------------------------
@@ -156,7 +238,6 @@ func Get` + proxyName + `(prefix string) *` + proxyName + ` {
 
 						if len(paramList) > 0 {
 							paramDecl = paramDecl[2:]
-							paramInvoke = paramInvoke[2:]
 						}
 
 						str += paramDecl + ")"
@@ -168,17 +249,28 @@ func Get` + proxyName + `(prefix string) *` + proxyName + ` {
 							resultDecl += "," + result
 						}
 
-						if len(resultList) > 1 {
-							resultDecl = "(" + resultDecl[1:] + ") "
-						} else if len(resultList) > 0 {
-							resultDecl = resultDecl[1:] + " "
+						if len(resultList) > 0 {
+							if len(resultList) > 1 {
+								resultDecl = "(" + resultDecl[1:] + ") "
+							} else {
+								resultDecl = resultDecl[1:] + " "
+							}
+
+							errorResult = errorResult[2:]
+							normalResult = "return " + normalResult[2:]
 						}
 
 						str += " " + resultDecl + `{
 
-	ret, err := distobj.Invoke(o.prefix, "` + ifaceName + `", "` + mtdName + `", ` + paramInvoke + `)
-	
-	return ret, err
+	ret, err := distobj.Invoke(o.prefix, o.className, "` + mtdName + `"` + paramInvoke + `)
+
+	if err != nil {
+		return ` + errorResult + `
+	}
+
+	` + resultConverter + `
+
+	` + normalResult + `
 }`
 
 						strOut += `
@@ -188,6 +280,12 @@ func Get` + proxyName + `(prefix string) *` + proxyName + ` {
 
 					fmt.Println("====================================>")
 					fmt.Println(strOut)
+
+					err = os.WriteFile(proxyName+".go", []byte(strOut), 0644)
+
+					if err != nil {
+						fmt.Println("error write file : ", err)
+					}
 				}
 			}
 		}

@@ -56,6 +56,28 @@ func (o *RedisKeyVal) Get(key string) string {
 	return ""
 }
 
+func (o *RedisKeyVal) Incr(key string) int64 {
+
+	cmd := o.client.Incr(o.ctx, key)
+
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
+
+	return 0
+}
+
+func (o *RedisKeyVal) Decr(key string) int64 {
+
+	cmd := o.client.Decr(o.ctx, key)
+
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
+
+	return 0
+}
+
 func (o *RedisKeyVal) GetInt(key string) int {
 
 	cmd := o.client.Get(o.ctx, key)

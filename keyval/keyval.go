@@ -17,6 +17,9 @@ type KeyValClient interface {
 	GetInt(key string) int
 	Del(key string) error
 
+	Incr(key string) int64
+	Decr(key string) int64
+
 	LPush(key string, val interface{}) error
 	LPop(key string) string
 	LPopInt(key string) int
