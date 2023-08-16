@@ -117,6 +117,14 @@ func (o *FiberContext) Next() error {
 	return o.ctx.Next()
 }
 
+func (o *FiberContext) InvokeNativeCtx(handlerFunc interface{}) error {
+	fiberHandler, okHandler := handlerFunc.(fiber.Handler)
+	if okHandler {
+		return fiberHandler(o.ctx)
+	}
+	return nil
+}
+
 // FiberApp -----------------------------------------------
 
 type FiberApp struct {
