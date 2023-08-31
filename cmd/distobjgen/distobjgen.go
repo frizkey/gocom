@@ -210,12 +210,28 @@ func Get` + proxyName + `(prefix ...string) *` + proxyName + ` {
 								errorResult += ", nil"
 								resultConverter += fmt.Sprintf("\n\tret%d := ret[%d]", i, i)
 							default:
+								fmt.Println("====>>> gen default : ", typeStr)
 								if strings.HasPrefix(typeStr, "[]") ||
 									strings.HasPrefix(typeStr, "map[") ||
 									strings.HasPrefix(typeStr, "*") {
 									errorResult += ", nil"
+
+									if strings.HasPrefix(typeStr, "[]") {
+
+										resultConverter += fmt.Sprintf("\n\tret%d := distobj.ToArr(ret[%d], \"%s\").(%s)", i, i, typeStr[2:], typeStr)
+									} else if strings.HasPrefix(typeStr, "map[") {
+
+										posLast := strings.Index(typeStr, "]")
+										keyType := typeStr[4:posLast]
+										valType := typeStr[posLast+1:]
+										resultConverter += fmt.Sprintf("\n\tret%d := distobj.ToMap(ret[%d], \"%s\", \"%s\").(%s)", i, i, keyType, valType, typeStr)
+									} else {
+
+										resultConverter += fmt.Sprintf("\n\tret%d := &%s{}", i, typeStr[1:])
+									}
 								} else {
 									errorResult += ", " + typeStr + "{}"
+									resultConverter += fmt.Sprintf("\n\tret%d := %s{}", i, typeStr)
 								}
 							}
 

@@ -44,12 +44,17 @@ func Invoke(prefix, className, methodName string, params ...interface{}) ([]inte
 	err = json.Unmarshal([]byte(retStr), &ret)
 
 	if err != nil {
+		fmt.Println("error 111111")
 		return nil, err
 	}
+
+	fmt.Println("error 222222")
 
 	if ret.IsErr {
 		return nil, errors.New(ret.ErrMsg)
 	}
+
+	fmt.Println("error 33333", ret.Result)
 
 	return ret.Result, err
 }
@@ -119,7 +124,14 @@ func proxy(prefix, className string, impl interface{}, method reflect.Method) {
 					res.Result = []interface{}{}
 
 					for _, elm := range retVal {
-						res.Result = append(res.Result, elm.Interface())
+
+						if elm.Interface() != nil {
+							
+							res.Result = append(res.Result, elm.Interface())
+						} else {
+							res.Result = append(res.Result, elm.Interface())
+						}
+
 					}
 				}
 			}
@@ -200,6 +212,20 @@ func ToStr(val interface{}) string {
 }
 
 func ToErr(val interface{}) error {
+
+	fmt.Printf("ERROR ::====>> %v", val)
+
+	valMap := val.(map[string]interface{})
+
+	for a, b := range valMap {
+
+		fmt.Print(a, "===>", b)
+	}
+
+	if val == nil {
+		return nil
+	}
+
 	ret, _ := val.(string)
 	return errors.New(ret)
 }
