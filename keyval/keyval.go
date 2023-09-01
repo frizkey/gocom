@@ -35,6 +35,8 @@ type KeyValClient interface {
 	HGet(key, field string) string
 	HGetAll(key string) map[string]string
 	HDel(key string, fields ...string) error
+	HLen(key string) int
+	HScan(key, pattern string, from, count int) map[string]string
 
 	Expire(key string, ttl time.Duration) error
 }

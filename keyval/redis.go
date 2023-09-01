@@ -265,6 +265,39 @@ func (o *RedisKeyVal) HDel(key string, fields ...string) error {
 	return o.client.HDel(o.ctx, key, fields...).Err()
 }
 
+func (o *RedisKeyVal) HLen(key string) int {
+
+	cmd := o.client.HLen(o.ctx, key)
+
+	if cmd.Err() == nil {
+		return int(cmd.Val())
+	}
+
+	return 0
+}
+
+func (o *RedisKeyVal) HScan(key, pattern string, from, count int) map[string]string {
+
+	ret := map[string]string{}
+	cmd := o.client.HScan(o.ctx, key, uint64(from), pattern, int64(count))
+
+	keyPos := false
+	itemKey := ""
+
+	for cmd.Iterator().Next(o.ctx) {
+
+		keyPos = !keyPos
+
+		if keyPos {
+			itemKey = cmd.Iterator().Val()
+		} else {
+			ret[itemKey] = cmd.Iterator().Val()
+		}
+	}
+
+	return ret
+}
+
 func (o *RedisKeyVal) Expire(key string, ttl time.Duration) error {
 
 	return o.client.Expire(o.ctx, key, ttl).Err()
