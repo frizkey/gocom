@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/adlindo/gocom"
@@ -17,6 +18,10 @@ func (o *KeyValCtrl) Init() {
 
 	gocom.POST("/keyvallist", o.postKeyValList)
 	gocom.GET("/keyvallist", o.getKeyValList)
+
+	gocom.POST("/keyval/map", o.postKeyValMap)
+	gocom.GET("/keyval/map", o.getKeyValMap)
+
 }
 
 func (o *KeyValCtrl) getKeyValList(ctx gocom.Context) error {
@@ -79,6 +84,41 @@ func (o *KeyValCtrl) getKeyVal(ctx gocom.Context) error {
 
 	return ctx.SendResult(val)
 }
+
+func (o *KeyValCtrl) postKeyValMap(ctx gocom.Context) error {
+
+	keyVal := gocom.KeyVal()
+	data := &TestDTO{}
+	ctx.Bind(&data)
+
+	if keyVal != nil {
+
+		mapVal := map[string]interface{}{data.DataString: data.DataString2}
+		err := keyVal.HSet("TestKeyValMap", mapVal)
+
+		if err == nil {
+			return ctx.SendResult(true)
+		}
+
+		return ctx.SendError(gocom.NewError(101, "Set map error : "+err.Error()))
+	} else {
+		return ctx.SendError(gocom.NewError(101, "invalid KeyVal conn"))
+	}
+}
+
+func (o *KeyValCtrl) getKeyValMap(ctx gocom.Context) error {
+	fmt.Println("sebelum ====> getKeyValMap")
+	mapVal := gocom.KeyVal().HScan("TestKeyValMap", "*", 0, 10)
+
+	fmt.Println("====>", mapVal)
+	for key, val := range mapVal {
+
+		fmt.Println(key, " : ", val)
+	}
+	return ctx.SendResult(mapVal)
+}
+
+//-------------------------------------------------
 
 var keyValCtrl *KeyValCtrl
 var keyValCtrlOnce sync.Once

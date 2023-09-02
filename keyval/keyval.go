@@ -22,10 +22,14 @@ type KeyValClient interface {
 
 	LPush(key string, val interface{}) error
 	LPop(key string) string
+	LPopCount(key string, count int) []string
 	LPopInt(key string) int
+
 	RPush(key string, val interface{}) error
 	RPop(key string) string
+	RPopCount(key string, count int) []string
 	RPopInt(key string) int
+
 	Len(key string) int64
 	AtIndex(key string, index int64) string
 	AtIndexInt(key string, index int64) int

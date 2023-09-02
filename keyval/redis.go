@@ -126,6 +126,17 @@ func (o *RedisKeyVal) LPop(key string) string {
 	return ""
 }
 
+func (o *RedisKeyVal) LPopCount(key string, count int) []string {
+
+	cmd := o.client.LPopCount(o.ctx, key, count)
+
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
+
+	return []string{}
+}
+
 func (o *RedisKeyVal) LPopInt(key string) int {
 
 	cmd := o.client.LPop(o.ctx, key)
@@ -161,6 +172,17 @@ func (o *RedisKeyVal) RPop(key string) string {
 	}
 
 	return ""
+}
+
+func (o *RedisKeyVal) RPopCount(key string, count int) []string {
+
+	cmd := o.client.RPopCount(o.ctx, key, count)
+
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
+
+	return []string{}
 }
 
 func (o *RedisKeyVal) RPopInt(key string) int {
@@ -279,19 +301,22 @@ func (o *RedisKeyVal) HLen(key string) int {
 func (o *RedisKeyVal) HScan(key, pattern string, from, count int) map[string]string {
 
 	ret := map[string]string{}
-	cmd := o.client.HScan(o.ctx, key, uint64(from), pattern, int64(count))
+	keys, _, err := o.client.HScan(o.ctx, key, uint64(from), pattern, int64(count)).Result()
 
-	keyPos := false
-	itemKey := ""
+	if err == nil {
 
-	for cmd.Iterator().Next(o.ctx) {
+		keyPos := false
+		itemKey := ""
 
-		keyPos = !keyPos
+		for _, val := range keys {
 
-		if keyPos {
-			itemKey = cmd.Iterator().Val()
-		} else {
-			ret[itemKey] = cmd.Iterator().Val()
+			keyPos = !keyPos
+
+			if keyPos {
+				itemKey = val
+			} else {
+				ret[itemKey] = val
+			}
 		}
 	}
 
