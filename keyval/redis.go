@@ -260,6 +260,16 @@ func (o *RedisKeyVal) HSet(key string, values map[string]interface{}) error {
 	return o.client.HSet(o.ctx, key, keyval...).Err()
 }
 
+func (o *RedisKeyVal) HSetNX(key string, values map[string]interface{}) error {
+
+	for name, val := range values {
+
+		o.client.HSetNX(o.ctx, key, name, val)
+	}
+
+	return nil
+}
+
 func (o *RedisKeyVal) HGet(key, field string) string {
 
 	cmd := o.client.HGet(o.ctx, key, field)

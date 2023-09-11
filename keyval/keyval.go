@@ -36,6 +36,7 @@ type KeyValClient interface {
 	Range(key string, start int64, stop int64) []string
 
 	HSet(key string, values map[string]interface{}) error
+	HSetNX(key string, values map[string]interface{}) error
 	HGet(key, field string) string
 	HGetAll(key string) map[string]string
 	HDel(key string, fields ...string) error
