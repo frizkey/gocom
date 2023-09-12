@@ -313,20 +313,22 @@ func (o *RedisKeyVal) HScan(key, pattern string, from, count int) map[string]str
 	ret := map[string]string{}
 	keys, _, err := o.client.HScan(o.ctx, key, uint64(from), pattern, int64(count)).Result()
 
-	if err == nil {
+	if err != nil {
+		fmt.Println("HSCAN ERROR : ", err)
+		return ret
+	}
 
-		keyPos := false
-		itemKey := ""
+	keyPos := false
+	itemKey := ""
 
-		for _, val := range keys {
+	for _, val := range keys {
 
-			keyPos = !keyPos
+		keyPos = !keyPos
 
-			if keyPos {
-				itemKey = val
-			} else {
-				ret[itemKey] = val
-			}
+		if keyPos {
+			itemKey = val
+		} else {
+			ret[itemKey] = val
 		}
 	}
 
