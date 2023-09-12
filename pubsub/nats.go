@@ -65,7 +65,7 @@ func (o *NatsPubSubClient) Request(subject string, msg interface{}, timeOut ...t
 
 func (o *NatsPubSubClient) Subscribe(subject string, eventHandler PubSubEventHandler) {
 
-	o.conn.Subscribe(subject, func(msg *nats.Msg) {
+	sub, err := o.conn.Subscribe(subject, func(msg *nats.Msg) {
 
 		defer func() {
 
@@ -79,11 +79,17 @@ func (o *NatsPubSubClient) Subscribe(subject string, eventHandler PubSubEventHan
 
 		eventHandler(subject, string(msg.Data))
 	})
+
+	if err == nil {
+
+		no := 10000000
+		sub.SetPendingLimits(no, no*1024)
+	}
 }
 
 func (o *NatsPubSubClient) RequestSubscribe(subject string, eventHandler PubSubReqEventHandler) {
 
-	o.conn.Subscribe(subject, func(msg *nats.Msg) {
+	sub, err := o.conn.Subscribe(subject, func(msg *nats.Msg) {
 
 		defer func() {
 
@@ -98,11 +104,17 @@ func (o *NatsPubSubClient) RequestSubscribe(subject string, eventHandler PubSubR
 		ret := eventHandler(subject, string(msg.Data))
 		msg.Respond([]byte(ret))
 	})
+
+	if err == nil {
+
+		no := 10000000
+		sub.SetPendingLimits(no, no*1024)
+	}
 }
 
 func (o *NatsPubSubClient) QueueSubscribe(subject string, queue string, eventHandler PubSubEventHandler) {
 
-	o.conn.QueueSubscribe(subject, queue, func(msg *nats.Msg) {
+	sub, err := o.conn.QueueSubscribe(subject, queue, func(msg *nats.Msg) {
 
 		defer func() {
 
@@ -116,6 +128,12 @@ func (o *NatsPubSubClient) QueueSubscribe(subject string, queue string, eventHan
 
 		eventHandler(subject, string(msg.Data))
 	})
+
+	if err == nil {
+
+		no := 10000000
+		sub.SetPendingLimits(no, no*1024)
+	}
 }
 
 func init() {
