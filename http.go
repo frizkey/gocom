@@ -49,6 +49,7 @@ type Context interface {
 	SendResult(data interface{}) error
 	SendError(err *CodedError) error
 	Next() error
+	InvokeNativeCtx(handlerFunc interface{}) error
 }
 
 type Result struct {
