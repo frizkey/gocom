@@ -9,7 +9,7 @@ import (
 
 type QueueClient interface {
 	Publish(name string, payload interface{}) error
-	Consume(name string, consumer QueueConsumerFunc) error
+	Consume(name string, consumer QueueConsumerFunc)
 }
 
 var queueMap map[string]QueueClient = map[string]QueueClient{}
@@ -17,7 +17,7 @@ var queueMutex sync.Mutex
 var queueCreatorMap map[string]QueueCreatorFunc = map[string]QueueCreatorFunc{}
 
 type QueueCreatorFunc func(url string) (QueueClient, error)
-type QueueConsumerFunc func(payload string)
+type QueueConsumerFunc func(name, payload string)
 
 func RegQueueCreator(typeName string, creator QueueCreatorFunc) {
 

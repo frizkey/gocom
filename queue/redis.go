@@ -50,9 +50,8 @@ func (o *RedisQueue) Publish(name string, payload interface{}) error {
 	return nil
 }
 
-func (o *RedisQueue) Consume(name string, consumer QueueConsumerFunc) error {
+func (o *RedisQueue) Consume(name string, consumer QueueConsumerFunc) {
 
-	return nil
 }
 
 // Init -------------------------------------------------------------------------------

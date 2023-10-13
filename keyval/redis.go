@@ -126,6 +126,17 @@ func (o *RedisKeyVal) LPop(key string) string {
 	return ""
 }
 
+func (o *RedisKeyVal) LPopCount(key string, count int) []string {
+
+	cmd := o.client.LPopCount(o.ctx, key, count)
+
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
+
+	return []string{}
+}
+
 func (o *RedisKeyVal) LPopInt(key string) int {
 
 	cmd := o.client.LPop(o.ctx, key)
@@ -161,6 +172,17 @@ func (o *RedisKeyVal) RPop(key string) string {
 	}
 
 	return ""
+}
+
+func (o *RedisKeyVal) RPopCount(key string, count int) []string {
+
+	cmd := o.client.RPopCount(o.ctx, key, count)
+
+	if cmd.Err() == nil {
+		return cmd.Val()
+	}
+
+	return []string{}
 }
 
 func (o *RedisKeyVal) RPopInt(key string) int {
@@ -238,6 +260,16 @@ func (o *RedisKeyVal) HSet(key string, values map[string]interface{}) error {
 	return o.client.HSet(o.ctx, key, keyval...).Err()
 }
 
+func (o *RedisKeyVal) HSetNX(key string, values map[string]interface{}) error {
+
+	for name, val := range values {
+
+		o.client.HSetNX(o.ctx, key, name, val)
+	}
+
+	return nil
+}
+
 func (o *RedisKeyVal) HGet(key, field string) string {
 
 	cmd := o.client.HGet(o.ctx, key, field)
@@ -263,6 +295,44 @@ func (o *RedisKeyVal) HGetAll(key string) map[string]string {
 func (o *RedisKeyVal) HDel(key string, fields ...string) error {
 
 	return o.client.HDel(o.ctx, key, fields...).Err()
+}
+
+func (o *RedisKeyVal) HLen(key string) int {
+
+	cmd := o.client.HLen(o.ctx, key)
+
+	if cmd.Err() == nil {
+		return int(cmd.Val())
+	}
+
+	return 0
+}
+
+func (o *RedisKeyVal) HScan(key, pattern string, from, count int) map[string]string {
+
+	ret := map[string]string{}
+	keys, _, err := o.client.HScan(o.ctx, key, uint64(from), pattern, int64(count)).Result()
+
+	if err != nil {
+		fmt.Println("HSCAN ERROR : ", err)
+		return ret
+	}
+
+	keyPos := false
+	itemKey := ""
+
+	for _, val := range keys {
+
+		keyPos = !keyPos
+
+		if keyPos {
+			itemKey = val
+		} else {
+			ret[itemKey] = val
+		}
+	}
+
+	return ret
 }
 
 func (o *RedisKeyVal) Expire(key string, ttl time.Duration) error {

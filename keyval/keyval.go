@@ -22,19 +22,26 @@ type KeyValClient interface {
 
 	LPush(key string, val interface{}) error
 	LPop(key string) string
+	LPopCount(key string, count int) []string
 	LPopInt(key string) int
+
 	RPush(key string, val interface{}) error
 	RPop(key string) string
+	RPopCount(key string, count int) []string
 	RPopInt(key string) int
+
 	Len(key string) int64
 	AtIndex(key string, index int64) string
 	AtIndexInt(key string, index int64) int
 	Range(key string, start int64, stop int64) []string
 
 	HSet(key string, values map[string]interface{}) error
+	HSetNX(key string, values map[string]interface{}) error
 	HGet(key, field string) string
 	HGetAll(key string) map[string]string
 	HDel(key string, fields ...string) error
+	HLen(key string) int
+	HScan(key, pattern string, from, count int) map[string]string
 
 	Expire(key string, ttl time.Duration) error
 }
