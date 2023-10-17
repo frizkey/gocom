@@ -42,11 +42,15 @@ func (o *KafkaPubSubClient) Publish(subject string, msg interface{}) error {
 	// check the topic is existed or not // if not exist will create new topic
 	o.checkTopic(topic)
 
-	return o.producer.Produce(&kafka.Message{
+	err = o.producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 		// Key:            []byte(subject),
 		Value: msgByte,
 	}, nil)
+
+	o.producer.Flush(5000)
+
+	return err
 }
 
 func (o *KafkaPubSubClient) Request(subject string, msg interface{}, timeOut ...time.Duration) (string, error) {
