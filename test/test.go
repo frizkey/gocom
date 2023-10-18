@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/adlindo/gocom"
+	"github.com/adlindo/gocom/test/distobj"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 	gocom.AddCtrl(GetQueueCtrl())
 	gocom.AddCtrl(GetPubSubCtrl())
 	gocom.AddCtrl(GetDistLockCtrl())
-	gocom.AddCtrl(GetDistObjCtrl())
+	gocom.AddCtrl(distobj.GetDistObjCtrl())
 
 	gocom.Start()
 }
