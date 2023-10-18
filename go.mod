@@ -3,16 +3,23 @@ module github.com/adlindo/gocom
 go 1.19
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/adjust/rmq/v5 v5.1.1
 	github.com/ansrivas/fiberprometheus/v2 v2.6.1
 	github.com/confluentinc/confluent-kafka-go v1.9.2
+	github.com/go-resty/resty/v2 v2.10.0
 	github.com/gofiber/fiber/v2 v2.48.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/jarcoal/httpmock v1.3.1
 	github.com/jinzhu/copier v0.3.5
+	github.com/maxatome/go-testdeep v1.13.0
 	github.com/nats-io/nats.go v1.30.2
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/redis/go-redis/v9 v9.0.2
+	github.com/rotisserie/eris v0.5.4
 	github.com/spf13/viper v1.15.0
+	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.24.0
 	gorm.io/driver/postgres v1.4.7
 )
@@ -46,15 +53,14 @@ require (
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.11.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.48.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	go.opentelemetry.io/otel v0.13.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/crypto v0.13.0 // indirect
-	golang.org/x/net v0.14.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
 
@@ -69,7 +75,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
