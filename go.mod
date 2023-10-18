@@ -6,6 +6,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/adjust/rmq/v5 v5.1.1
 	github.com/ansrivas/fiberprometheus/v2 v2.6.1
+	github.com/aws/aws-sdk-go v1.45.27
 	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/go-resty/resty/v2 v2.10.0
 	github.com/gofiber/fiber/v2 v2.48.0
@@ -18,6 +19,9 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/rotisserie/eris v0.5.4
+	github.com/rs/zerolog v1.31.0
+	github.com/segmentio/kafka-go v0.4.44
+	github.com/segmentio/kafka-go/sasl/aws_msk_iam v0.1.0
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.24.0
@@ -39,6 +43,7 @@ require (
 	github.com/jackc/pgx/v5 v5.2.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
@@ -47,6 +52,7 @@ require (
 	github.com/nats-io/nats-server/v2 v2.10.2 // indirect
 	github.com/nats-io/nkeys v0.4.5 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
+	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.16.0 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
