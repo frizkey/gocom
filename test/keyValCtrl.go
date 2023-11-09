@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/adlindo/gocom"
+	"github.com/frizkey/gocom"
 )
 
 type KeyValCtrl struct {

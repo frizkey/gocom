@@ -1,4 +1,4 @@
-module github.com/adlindo/gocom
+module github.com/frizkey/gocom
 
 go 1.19
 

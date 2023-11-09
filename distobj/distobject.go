@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/adlindo/gocom/queue"
+	"github.com/frizkey/gocom/queue"
 )
 
 type Request struct {

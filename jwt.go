@@ -2,10 +2,9 @@ package gocom
 
 import (
 	"fmt"
-	"time"
-
-	"github.com/adlindo/gocom/secret"
+	"github.com/frizkey/gocom/secret"
 	"github.com/golang-jwt/jwt/v4"
+	"time"
 )
 
 func NewJWT(data map[string]interface{}, ttl ...time.Duration) (string, error) {

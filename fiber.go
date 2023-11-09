@@ -1,13 +1,13 @@
 package gocom
 
 import (
+	"github.com/ansrivas/fiberprometheus/v2"
+	"github.com/gofiber/fiber/v2"
 	"io/ioutil"
 	"os"
 	"strconv"
 
-	"github.com/adlindo/gocom/config"
-	"github.com/ansrivas/fiberprometheus/v2"
-	"github.com/gofiber/fiber/v2"
+	"github.com/frizkey/gocom/config"
 )
 
 // FiberContext -------------------------------------------

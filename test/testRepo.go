@@ -3,8 +3,7 @@ package main
 import (
 	"sync"
 
-	"github.com/adlindo/gocom"
-	"github.com/oklog/ulid/v2"
+	"github.com/frizkey/gocom"
 	"gorm.io/gorm"
 )
 

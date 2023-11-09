@@ -3,8 +3,8 @@ package distobj
 import (
 	"sync"
 
-	"github.com/adlindo/gocom"
-	"github.com/adlindo/gocom/distobj"
+	"github.com/frizkey/gocom"
+	"github.com/frizkey/gocom/distobj"
 )
 
 type DistObjCtrl struct {

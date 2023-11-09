@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/adlindo/gocom"
+	"github.com/frizkey/gocom"
 )
 
 type JWTCtrl struct {

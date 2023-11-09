@@ -3,8 +3,8 @@ package main
 import (
 	"sync"
 
-	"github.com/adlindo/gocom"
-	"github.com/adlindo/gocom/secret"
+	"github.com/frizkey/gocom"
+	"github.com/frizkey/gocom/secret"
 )
 
 type SecretCtrl struct {
